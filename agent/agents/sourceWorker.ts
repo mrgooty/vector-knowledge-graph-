@@ -3,7 +3,7 @@ import type { NormalizedDoc, Provider } from "@/lib/types";
 import { fetchEuropePmc } from "@/lib/sources/europepmc";
 import { fetchOpenAlex } from "@/lib/sources/openalex";
 import { fetchArxiv } from "@/lib/sources/arxiv";
-import { fetchReddit } from "@/lib/sources/reddit";
+import { fetchStackOverflow } from "@/lib/sources/stackoverflow";
 
 // A single specialized source worker. Each owns one upstream API, fetches with
 // a hard timeout, and reports timing — so the supervisor can run them all in
@@ -15,7 +15,7 @@ const FETCHERS: Partial<
   europepmc: fetchEuropePmc,
   openalex: fetchOpenAlex,
   arxiv: fetchArxiv,
-  reddit: fetchReddit,
+  stackoverflow: fetchStackOverflow,
 };
 
 const DEFAULT_TIMEOUT_MS = 9000;

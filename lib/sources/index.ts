@@ -2,7 +2,7 @@ import type { NormalizedDoc, Provider } from "../types";
 import { fetchEuropePmc } from "./europepmc";
 import { fetchOpenAlex } from "./openalex";
 import { fetchArxiv } from "./arxiv";
-import { fetchReddit } from "./reddit";
+import { fetchStackOverflow } from "./stackoverflow";
 
 export interface GatherOptions {
   perSource?: number;
@@ -22,10 +22,15 @@ const REGISTRY: Record<
   europepmc: fetchEuropePmc,
   openalex: fetchOpenAlex,
   arxiv: fetchArxiv,
-  reddit: fetchReddit,
+  stackoverflow: fetchStackOverflow,
 };
 
-const DEFAULT_SOURCES: Provider[] = ["europepmc", "openalex", "arxiv", "reddit"];
+const DEFAULT_SOURCES: Provider[] = [
+  "europepmc",
+  "openalex",
+  "arxiv",
+  "stackoverflow",
+];
 
 /**
  * Fan out to every source in parallel. Failures are isolated per-source so one

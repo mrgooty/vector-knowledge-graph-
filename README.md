@@ -1,7 +1,7 @@
 # Knowledge Copilot
 
 A live research agent. Ask one natural-language question and it goes to the
-internet, pulls relevant **research papers** and **Reddit health discussions**
+internet, pulls relevant **research papers** and **Stack Overflow Q&A**
 (plus seeded **reports**), indexes them into a Postgres + `pgvector` store on the
 fly, then synthesizes a **cited** answer — with every source shown and scored.
 
@@ -18,7 +18,7 @@ React UI (/browse)                     React UI (/ask)
    │                                      │  POST /api/ask  (streamed)
    │  GraphQL query                       ▼
    ▼                                   Agent (LangGraph.js)
-GraphQL resolver (graphql-yoga)         ├─ gather    → fetch papers + Reddit IN PARALLEL,
+GraphQL resolver (graphql-yoga)         ├─ gather    → fetch papers + Stack Overflow IN PARALLEL,
    │                                    │              dedup, embed ONLY new, upsert
    ▼                                    ├─ retrieve  → MCP search_knowledge (HYBRID: vector + lexical, RRF)
 Postgres (documents + messages)         ├─ synthesize→ LLM cites by [n], answers only from chunks
@@ -53,10 +53,10 @@ HNSW is tuned at `m = 16`, `ef_construction = 128` (see `lib/schema.sql`).
 
 | Provider | What | Auth |
 |---|---|---|
-| **Europe PMC** | Biomedical literature (primary) | none |
 | **OpenAlex** | 250M+ works, all fields | optional key |
-| **arXiv** | Preprints (CS/physics) | none |
-| **Reddit** | Live health-subreddit discussions | OAuth2 app |
+| **arXiv** | Preprints (all STEM) | none |
+| **Europe PMC** | Biomedical literature | none |
+| **Stack Overflow** | Technical Q&A (accepted answers) | optional key |
 
 ---
 
@@ -69,14 +69,8 @@ npm run migrate                    # creates extensions, tables, indexes, search
 npm run dev
 ```
 
-Optionally pre-warm the corpus (not required — the agent ingests live):
-
-```bash
-npm run seed:papers "intermittent fasting metabolic health"
-npm run seed:reddit "chronic fatigue"
-npm run seed:reports
-# or: npm run seed:all
-```
+The corpus is built live — the agent gathers, ingests, and indexes sources on
+each query, so no seeding step is required.
 
 ### Environment variables
 
@@ -87,7 +81,7 @@ npm run seed:reports
 | `ANTHROPIC_API_KEY` | Answer synthesis (Claude, Messages API) |
 | `SYNTHESIS_MODEL` | Optional chat model override (default `claude-3-5-haiku-latest`) |
 | `VOYAGE_API_KEY` **or** `OPENAI_API_KEY` | Embeddings — see note below |
-| `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET` / `REDDIT_USER_AGENT` | Reddit OAuth2 |
+| `STACKEXCHANGE_KEY` | Optional, raises Stack Exchange API quota |
 | `OPENALEX_API_KEY` / `OPENALEX_MAILTO` | Optional, raises OpenAlex limits |
 
 > **Embeddings provider:** Anthropic has no embeddings API. Set **`VOYAGE_API_KEY`**
@@ -119,15 +113,9 @@ npm run seed:reports
 - **arXiv** — open-access preprints, fetched via the public API.
 - **Europe PMC / OpenAlex** — open scholarly metadata and abstracts; we store
   titles/abstracts and link back to the original.
-- **Reddit** — public posts via the **official OAuth2 API** (non-commercial
-  tier). Governance guardrails baked in:
-  - author handles are **never stored**,
-  - post/comment bodies are **PII-scrubbed** on ingest (`lib/sanitize.ts`):
-    emails, phone numbers, and user mentions are redacted,
-  - restricted to health subreddits, polite rate, results linked back to source.
-
-  This is a best-effort guardrail, not a guarantee. For a stricter posture, swap
-  the live Reddit connector for a licensed, de-identified research dataset.
+- **Stack Overflow** — public Q&A via the **official Stack Exchange API**
+  (non-commercial tier). We store the question plus its top/accepted answer,
+  never user handles, and link back to the source.
 - **Reports** — synthetic, clearly tagged `synthetic: true`.
 
 ---
@@ -146,16 +134,16 @@ lib/
   schema.sql            tables + pgvector + pg_trgm + RRF search fn
   embeddings.ts         embeddings (Voyage or OpenAI, auto-detected)
   llm.ts                synthesis (Anthropic Claude)
-  chunk.ts sanitize.ts  chunking + PII scrubbing
+  chunk.ts              chunking
   ingest.ts             idempotent upsert (dedup, embed-only-new)
   graphql.ts            SDL + resolvers (human path)
-  sources/              europepmc, openalex, arxiv, reddit + aggregator
+  sources/              europepmc, openalex, arxiv, stackoverflow + aggregator
 mcp/
   tools.ts server.ts client.ts   MCP: search_knowledge, get_document
 agent/
   nodes.ts graph.ts run.ts        LangGraph: gather→retrieve→synthesize→assemble
 scripts/
-  migrate.ts seed-*.ts            DB migration + corpus pre-warming
+  migrate.ts                      DB migration
 ```
 # vector-knowledge-graph-
 # vector-knowledge-graph-

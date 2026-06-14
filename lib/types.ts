@@ -4,7 +4,7 @@ export type Provider =
   | "europepmc"
   | "openalex"
   | "arxiv"
-  | "reddit"
+  | "stackoverflow"
   | "report"
   | "manual";
 

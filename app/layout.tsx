@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Knowledge Copilot",
   description:
-    "Ask one natural-language question across research papers, Reddit health discussions, and reports — with every source shown.",
+    "Ask one natural-language question across research papers, Stack Overflow, and reports — across every field, with every source shown.",
 };
 
 export default function RootLayout({

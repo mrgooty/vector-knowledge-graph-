@@ -7,11 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrate": "tsx scripts/migrate.ts",
-    "seed:papers": "tsx scripts/seed-papers.ts",
-    "seed:reddit": "tsx scripts/seed-reddit.ts",
-    "seed:reports": "tsx scripts/seed-reports.ts",
-    "seed:all": "npm run seed:papers && npm run seed:reddit && npm run seed:reports"
+    "migrate": "tsx scripts/migrate.ts"
   },
   "dependencies": {
     "@langchain/core": "^1.1.49",

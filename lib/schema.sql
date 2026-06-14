@@ -6,11 +6,11 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 -- ── documents ────────────────────────────────────────────────────────────
 -- A source document of any type. `external_id` is the stable id from the
--- provider (DOI / arXiv id / Reddit id) and is the dedup key for live ingest.
+-- provider (DOI / arXiv id / Stack Overflow id) and is the dedup key for live ingest.
 CREATE TABLE IF NOT EXISTS documents (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   source_type  TEXT NOT NULL CHECK (source_type IN ('paper', 'chat', 'report')),
-  provider     TEXT NOT NULL DEFAULT 'manual', -- europepmc | openalex | arxiv | reddit | report
+  provider     TEXT NOT NULL DEFAULT 'manual', -- europepmc | openalex | arxiv | stackoverflow | report
   external_id  TEXT,                            -- provider-native id (dedup)
   title        TEXT NOT NULL,
   authors      TEXT,
@@ -27,7 +27,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS documents_provider_external_id_key
 CREATE INDEX IF NOT EXISTS documents_source_type_idx ON documents (source_type);
 
 -- ── messages ─────────────────────────────────────────────────────────────
--- Chat threads (Reddit discussions, persisted Q&A) render from these.
+-- Chat threads (Stack Overflow Q&A, persisted threads) render from these.
 CREATE TABLE IF NOT EXISTS messages (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   document_id  UUID NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
