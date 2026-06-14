@@ -2,7 +2,7 @@
 // Swap the model with SYNTHESIS_MODEL. Provides buffered + streaming variants.
 
 const SYNTHESIS_MODEL =
-  process.env.SYNTHESIS_MODEL || "claude-3-5-haiku-latest";
+  process.env.SYNTHESIS_MODEL || "claude-haiku-4-5-20251001";
 const ANTHROPIC_VERSION = "2023-06-01";
 const MAX_TOKENS = Number(process.env.SYNTHESIS_MAX_TOKENS || 1500);
 
