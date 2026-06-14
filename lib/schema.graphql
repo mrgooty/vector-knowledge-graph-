@@ -1,0 +1,29 @@
+# GraphQL is the HUMAN browsing path: typed, multi-domain reads for the UI.
+# It deliberately does NOT expose chunk/vector search — that stays in MCP.
+
+type Message {
+  id: ID!
+  role: String!
+  body: String!
+  position: Int!
+}
+
+type Document {
+  id: ID!
+  sourceType: String!
+  provider: String!
+  title: String!
+  authors: String
+  url: String
+  metadata: JSON
+  createdAt: String!
+  messageCount: Int!
+  messages: [Message!]!
+}
+
+scalar JSON
+
+type Query {
+  documents(sourceType: String, limit: Int): [Document!]!
+  document(id: ID!): Document
+}
